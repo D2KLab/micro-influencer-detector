@@ -78,6 +78,8 @@ topic_selected = raw_input('What topic are you looking micro-influencers for?\n'
 if not topic_selected.startswith('#'):
 	topic_selected = "#"+topic_selected
 	print topic_selected
+
+users_returned = []
 flag = 0
 for tweet in tweepy.Cursor(api.search,q="#offgrid", count = 100, lang = "en").items(200):
 	if flag == 0:
@@ -86,7 +88,11 @@ for tweet in tweepy.Cursor(api.search,q="#offgrid", count = 100, lang = "en").it
 		print("users with at least 1k and at most 20k followers,")
 		print("having recently spoke about topic selected")
 	if (tweet.user.followers_count>1000 and tweet.user.followers_count<20000):
-		print (tweet.user.screen_name)
+		#print (tweet.user.screen_name)
+		users_returned.append(tweet.user.screen_name)
+
+unique_users_returned = set(users_returned)
+print(unique_users_returned)
 
 
 
