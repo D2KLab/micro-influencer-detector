@@ -65,12 +65,51 @@ api = tweepy.API(auth)#, wait_on_rate_limit=True, wait_on_rate_limit_notify=True
 #-------------------------------------------------------#
 #------------authentication phase terminated------------#
 #-------------------------------------------------------#
+print "[0] authentication completed with success"
+
+#----------------------------------------------------------------------------------------------------------#
+#--this function will be used to react to Twitter api rate limit error/limitation, wait on it and restart--#
+#----------------------------------------------------------------------------------------------------------#
+def limit_handled(cursor):
+    while True:
+        try:
+            yield cursor.next()
+        except tweepy.RateLimitError:
+            time.sleep(15*60)
 
 #---------------------------------------------------#
 #--Create the Data collection folder if not exists--#
 #---------------------------------------------------#
 if not os.path.exists(pathToDataFolder):  #here we will store data collection after tweets retrieval
    os.makedirs(pathToDataFolder)
+
+#-------------------------------------------------------------------#
+#--Create the potential micro influencer list folder if not exists--#
+#-------------------------------------------------------------------#
+if not os.path.exists(pathToDataFolder+"/00_potential_micro_influencers_users"):  
+   os.makedirs(pathToDataFolder+"/00_potential_micro_influencers_users")
+
+#-------------------------------------------------------------------------------------#
+#--Create the follower list folder for all potential micro influencers if not exists--#
+#-------------------------------------------------------------------------------------#
+if not os.path.exists(pathToDataFolder+"/01_followers_list"):  
+	   os.makedirs(pathToDataFolder+"/01_followers_list")
+	
+#----------------------------------------------------------------------------------------------------#
+#--Create the selected and filtered tweets folder for all potential micro influencers if not exists--#
+#----------------------------------------------------------------------------------------------------#   
+if not os.path.exists(pathToDataFolder+"/02_users_tweets"):  
+	   os.makedirs(pathToDataFolder+"/02_users_tweets")
+
+#-----------------------------------------------------------------------------#
+#--Create users_parameters folder of potential micrp infuencer if not exists--#
+#-----------------------------------------------------------------------------#   
+if not os.path.exists(pathToDataFolder+"/03_users_parameters/recall"):  
+	   os.makedirs(pathToDataFolder+"/03_users_parameters/recall")
+if not os.path.exists(pathToDataFolder+"/03_users_parameters/embeddness"):  
+	   os.makedirs(pathToDataFolder+"/03_users_parameters/embeddness")
+
+print "[1] all folders created or checked"
 
 #------------------------------------------------------------------------------------------------#
 #--Selection of the topic, just one for the moment, in which you want to find micro influencers--#
@@ -85,7 +124,7 @@ if not topic_selected.startswith('#'):
 #----------------------------------------------------------------------------#
 users_returned = []
 flag = 0
-for tweet in tweepy.Cursor(api.search,q=topic_selected, count = 100, lang = "en").items(200):
+for tweet in tweepy.Cursor(api.search,q=topic_selected, count = 100, lang = "en").items(10000):  #now 10000
 	if flag == 0:
 		flag = 1
 		print("\n")
@@ -99,63 +138,115 @@ for tweet in tweepy.Cursor(api.search,q=topic_selected, count = 100, lang = "en"
 unique_users_returned = set(users_returned)
 unique_users_returned = list(unique_users_returned)
 
-if not os.path.exists(pathToDataFolder+"/potential_micro_influencers_users"):  
-   os.makedirs(pathToDataFolder+"/potential_micro_influencers_users")
-
-fp1 = open(pathToDataFolder+"/potential_micro_influencers_users"+"/"+"potential_mi.txt", "w")
+#----------------------------------------------------------#
+#--Here we write the potential micro influencers selected--#
+#----------------------------------------------------------#
+fp1 = open(pathToDataFolder+"/00_potential_micro_influencers_users"+"/"+"potential_mi.txt", "w")
 for mi_username in unique_users_returned:
 	fp1.write((str(mi_username)+"\n").encode("utf-8"))
 fp1.close()
-print "Searching users phase completed."
+print "[2] Searching users potential micro influencers phase completed."
 
 #-----------------------------------------------------------------------------------------#
 #--Searching and saving followers lists ids of potential micro influencers on that topic--#
 #-----------------------------------------------------------------------------------------#
-print("\n")
-if not os.path.exists(pathToDataFolder+"/followers_list"):  
-	   os.makedirs(pathToDataFolder+"/followers_list")
-if not os.path.exists(pathToDataFolder+"/users_tweets"):  
-	   os.makedirs(pathToDataFolder+"/users_tweets")
 
-def limit_handled(cursor):
-    while True:
-        try:
-            yield cursor.next()
-        except tweepy.RateLimitError:
-            time.sleep(15*60)
-
-
-####work in progress retweets list
-for username in unique_users_returned:
-	#get tweets
-	print "Searching tweets of " + username
-	fp3 = open(pathToDataFolder+"/users_tweets"+"/"+username+"_tweets.txt", "w")
-	for page in limit_handled(tweepy.Cursor(api.user_timeline, username, count=100).pages()):
-		for tweet in page:
-			#----------->>>>>>#results = api.retweets(firstTweet.id)
-			fp3.write((str(tweet.id) +" : "+tweet.text+"\n").encode("utf-8"))
-	fp3.close()
-
-print "tweets printed"
-
-###work in progress2 rate limit 
 for i in unique_users_returned:
-	print "potential micro influencer " + i
-	fp2 = open(pathToDataFolder+"/followers_list"+"/"+i+"_followers_ids.txt", "w")
-	for follower_id in limit_handled(tweepy.Cursor(api.followers_ids, screen_name=i).items()):
-		fp2.write((str(follower_id)+"\n").encode("utf-8"))
+	while True:
+		try:
+			print "retrieving followers of:  " + i 
+			fp2 = open(pathToDataFolder+"/01_followers_list"+"/"+i, "w")
+			for follower_id in limit_handled(tweepy.Cursor(api.followers_ids, screen_name=i).items()):
+				fp2.write((str(follower_id)+"\n").encode("utf-8"))
+			fp2.close()
+			break #exiting infinite while loop
+		except tweepy.TweepError as e:
+	        print(e.reason)
+	        print "don't worry, i'll sleep 30 seconds and then i'll try again"
+	        sleep(30)
+	        continue
+
+print "[3] Storing users followers phase completed."
+
+
+for username in unique_users_returned:
+	while True:
+		try:
+			username_followers_list = []
+			significative_tweets_counter = 0.0
+			total_retweets_performed_by_followers = 0.0
+			fp2 = open(pathToDataFolder+"/01_followers_list"+"/"+username, "r")
+			for line in fp2.readlines():
+				line.rstrip('\n')
+				username_followers_list.append(line)
+			fp2.close()
+			#get tweets
+			print "Searching tweets of " + username
+			fp3 = open(pathToDataFolder+"/02_users_tweets"+"/"+username, "w")
+			for page in limit_handled(tweepy.Cursor(api.user_timeline, username).pages()):  #all tweets
+				for tweet in page:
+					if re.match(r'^(RT)',tweet.text): #avoid retweets with no user generated text
+				    		continue
+					if topic_selected in tweet.text:  #filtering topic about topic selected and print just them
+						fp3.write((str(tweet.id) +" : "+tweet.text+"\n").encode("utf-8"))
+						significative_tweets_counter +=1
+						for retweeter_id in limit_handled(tweepy.Cursor(api.retweets, id=tweet.id).items()):
+							if retweeter_id in username_followers_list:
+								total_retweets_performed_by_followers +=1
+			fp3.close()
+			if significative_tweets_counter > 0:
+				recallScore = (total_retweets_performed_by_followers/significative_tweets_counter)/len(username_followers_list)
+			else:
+				recallScore = 0.0
+			fp4 = open(pathToDataFolder+"/03_users_parameters/recall"+"/"+username+"_recallScore.txt", "w");
+			fp4.write(str(recallScore).encode("utf-8"))
+			fp4.close()
+			break #exiting infinite while loop
+		except tweepy.TweepError as e:
+	        print(e.reason)
+	        print "don't worry, i'll sleep 30 seconds and then i'll try again"
+	        sleep(30)
+	        continue
+
+print "[4] filtered by topic tweets printed (no pure retweets) and recall score calculated"
+ 
+#### passiamo alla fase di embeddness score
+#### ovvero la sovrapposizione dei followers tra potenziali micro influencer
+#### seguiamo la teoria secondo cui l'informazione si propaga a cascata se almeno due o 
+#### più utenti la suggeriscono
+#### sommiamo su un contatore quante volte i followers di un utente si ripresentano negli altri della
+#### lista e alla fine dividiamo per il numero di follower di quell'utente
+
+compare_follows_dict = {}
+
+for username in unique_users_returned:
+	username_followers_list = []
+	fp2 = open(pathToDataFolder+"/01_followers_list"+"/"+username, "r")
+	for line in fp2.readlines():
+		line.rstrip('\n')
+		username_followers_list.append(line)
 	fp2.close()
-	# try:
-	# 	array_of_user_friends_id = api.followers_ids(screen_name=i)
-	# except:
-	# 	print  "Having some trouble"
-	# #print array_of_user_friends_id[1]
-	# fp2 = open(pathToDataFolder+"/followers_list"+"/"+i+"_followers_ids.txt", "w")
-	# for follower in array_of_user_friends_id:
-	# 	fp2.write((str(follower)+"\n").encode("utf-8"))
-	# fp2.close()
+	compare_follows_dict[username] = username_followers_list
 
-print "Storing users followers phase completed."
+print "[5] dictionary created"
 
-	#id_tweet - tweet_text 1 file, id_tweet list of user that have retweets 2 file, foreach user for each tweet  
-	
+embeddnessScore = 0.0
+
+for user in compare_follows_dict:
+	total_overlapping = 0.0  #sum up all followers of a mi when compare in other mi followers list
+	followers_count = len(compare_follows_dict[user])
+	for user2 in compare_follows_dict:
+		if user != user2 :
+			same_followers_list = set(compare_follows_dict[user]) & set(compare_follows_dict[user2])
+			total_overlapping += len(same_followers_list)
+
+	if followers_count > 0:
+		embeddnessScore = total_overlapping/followers_count
+	else:
+		embeddnessScore = 0.0
+	fp4 = open(pathToDataFolder+"/03_users_parameters/embeddness"+"/"+user+"_embeddnessScore.txt", "w");
+	fp4.write(str(embeddnessScore).encode("utf-8"))
+	fp4.close()
+
+print "[6] embeddness score computed and stored"
+print "[7]end of main"
