@@ -160,55 +160,36 @@ for i in unique_users_returned:
 				fp2.write((str(follower_id)+"\n").encode("utf-8"))
 			fp2.close()
 			break #exiting infinite while loop
-		except tweepy.TweepError as e:
-	        print(e.reason)
-	        print "don't worry, i'll sleep 30 seconds and then i'll try again"
-	        sleep(30)
-	        continue
+		except tweepy.TweepError:
+			time.sleep(30)
 
 print "[3] Storing users followers phase completed."
 
 
 for username in unique_users_returned:
+	username_followers_list = []
+	significative_tweets_counter = 0.0
+	total_retweets_performed_by_followers = 0.0
+	fp2 = open(pathToDataFolder+"/01_followers_list"+"/"+username, "r")
+	for line in fp2.readlines():
+		line.rstrip('\n')
+		username_followers_list.append(line)
+	fp2.close()
 	while True:
 		try:
-			username_followers_list = []
-			significative_tweets_counter = 0.0
-			total_retweets_performed_by_followers = 0.0
-			fp2 = open(pathToDataFolder+"/01_followers_list"+"/"+username, "r")
-			for line in fp2.readlines():
-				line.rstrip('\n')
-				username_followers_list.append(line)
-			fp2.close()
 			#get tweets
 			print "Searching tweets of " + username
 			fp3 = open(pathToDataFolder+"/02_users_tweets"+"/"+username, "w")
-			for page in limit_handled(tweepy.Cursor(api.user_timeline, username).pages()):  #all tweets
+			for page in limit_handled(tweepy.Cursor(api.user_timeline, username, count=100).pages()):  #all tweets
 				for tweet in page:
-					if re.match(r'^(RT)',tweet.text): #avoid retweets with no user generated text
-				    		continue
-					if topic_selected in tweet.text:  #filtering topic about topic selected and print just them
-						fp3.write((str(tweet.id) +" : "+tweet.text+"\n").encode("utf-8"))
-						significative_tweets_counter +=1
-						for retweeter_id in limit_handled(tweepy.Cursor(api.retweets, id=tweet.id).items()):
-							if retweeter_id in username_followers_list:
-								total_retweets_performed_by_followers +=1
+					fp3.write((str(tweet.id) +" : "+tweet.text+"\n").encode("utf-8"))					
 			fp3.close()
-			if significative_tweets_counter > 0:
-				recallScore = (total_retweets_performed_by_followers/significative_tweets_counter)/len(username_followers_list)
-			else:
-				recallScore = 0.0
-			fp4 = open(pathToDataFolder+"/03_users_parameters/recall"+"/"+username+"_recallScore.txt", "w");
-			fp4.write(str(recallScore).encode("utf-8"))
-			fp4.close()
 			break #exiting infinite while loop
 		except tweepy.TweepError as e:
-	        print(e.reason)
-	        print "don't worry, i'll sleep 30 seconds and then i'll try again"
-	        sleep(30)
-	        continue
+			print(e)
 
-print "[4] filtered by topic tweets printed (no pure retweets) and recall score calculated"
+
+print "[4]tweets retrieved and stored"
  
 #### passiamo alla fase di embeddness score
 #### ovvero la sovrapposizione dei followers tra potenziali micro influencer
@@ -231,7 +212,6 @@ for username in unique_users_returned:
 print "[5] dictionary created"
 
 embeddnessScore = 0.0
-
 for user in compare_follows_dict:
 	total_overlapping = 0.0  #sum up all followers of a mi when compare in other mi followers list
 	followers_count = len(compare_follows_dict[user])
@@ -249,4 +229,56 @@ for user in compare_follows_dict:
 	fp4.close()
 
 print "[6] embeddness score computed and stored"
-print "[7]end of main"
+
+
+###computing recall and interes## 
+for username in unique_users_returned:
+	print username
+	username_followers_list = []
+	fp2 = open(pathToDataFolder+"/01_followers_list"+"/"+username, "r")
+	for line in fp2.readlines():
+		username_followers_list.append(line.rstrip('\n'))
+	fp2.close()
+	significative_tweets_counter = 0.0
+	total_retweets_performed_by_followers = 0.0
+	user_tweets_counter = 0.0 
+
+	fp3 = open(pathToDataFolder+"/02_users_tweets"+"/"+username, "r")
+	for line in fp3.readlines():
+		#print line
+		user_tweets_counter += 1 
+		if topic_selected in line:
+			significative_tweets_counter +=1
+			informations = []
+			informations = line.split(" ")
+			#print informations[0]
+			if (informations[0].rstrip("\n")).isdigit():
+				#print "info : " + informations[0].rstrip("\n")				
+				try:
+					statuses = api.retweets(informations[0].rstrip("\n"))
+					for status in statuses:
+						#print "status user id :" + str(status.user.id)
+						if str(status.user.id).rstrip("\n") in username_followers_list:
+							print "status inside if: " + str(status.user.id)
+							time.sleep(10)
+							total_retweets_performed_by_followers +=1
+				except tweepy.RateLimitError:
+					time.sleep(15*60)
+			#for status in tweepy.Cursor(api.retweets, id=str(informations[0])).items():
+			#	if status.user.id_str in username_followers_list:
+			#		total_retweets_performed_by_followers +=1
+	fp3.close()
+	if significative_tweets_counter > 0:
+		recallScore = (total_retweets_performed_by_followers/significative_tweets_counter)#/len(username_followers_list) rimosso per la non pagination quindi 100 retweet per tutti
+	else:
+		recallScore = 0.0
+	if user_tweets_counter > 0:
+		interest_in_that_topic = significative_tweets_counter/user_tweets_counter
+	else:
+		interest_in_that_topic = 0.0
+	fp4 = open(pathToDataFolder+"/03_users_parameters/recall"+"/"+username+"_recallScore.txt", "w");
+	fp4.write((str(recallScore)+ " " +str(interest_in_that_topic)).encode("utf-8"))
+	fp4.close()
+
+print "[7] filtered by topic tweets printed (no pure retweets) and recall score calculated"
+print "[8]end of main"
