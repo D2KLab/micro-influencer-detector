@@ -79,8 +79,10 @@ def create_all_necessary_folders(pathToDataFolder, topic_selected):
 		   os.makedirs(pathToDataFolder+"/03_users_parameters/recall")
 	if not os.path.exists(pathToDataFolder+"/03_users_parameters/embeddness"):  
 		   os.makedirs(pathToDataFolder+"/03_users_parameters/embeddness")
+	if not os.path.exists(pathToDataFolder+"/03_users_parameters/interest"):  
+		   os.makedirs(pathToDataFolder+"/03_users_parameters/interest")
 	print "[1] all folders created or checked" 
-	return pathToDataFolder
+	return pathToDataFolder 
 def topic_selection():
 	topic_selected = raw_input('What topic are you looking micro-influencers for?\n')
 	if not topic_selected.startswith('#'):
@@ -166,7 +168,7 @@ def retrieve_and_store_tweet_tab_back(pathToUserTweets, unique_users_returned, a
 			except tweepy.TweepError as e:
 				print(e)
 	print "[4]tweets retrieved and stored" 
-def compute_and_store_embeddeness(pathToFollowerList, pathToUserParameters, unique_users_returned, api):
+def compute_and_store_embeddeness(pathToFollowerList, pathToUserParameters, unique_users_returned):
 	compare_follows_dict = {}
 	for username in unique_users_returned:
 		username_followers_list = []
@@ -193,7 +195,26 @@ def compute_and_store_embeddeness(pathToFollowerList, pathToUserParameters, uniq
 		fp4.write(str(embeddnessScore).encode("utf-8"))
 		fp4.close()
 	print "[6] embeddness score computed and stored" 
-def compute_and_store_recall_and_interest(topic_selected, pathToFollowerList, pathToUserTweets, pathToUserParameters, unique_users_returned, api):
+def compute_and_store_interest(topic_selected, pathToUserTweets, pathToUserParameters, unique_users_returned):
+	for user in unique_users_returned:
+		#print topic_selected
+		#print topic_selected[1:]
+		significative_tweets_counter = 0.0
+		total_tweets = 0.0 
+		f = open(pathToUserTweets+user, "r")
+		for line in f.readlines():
+			if topic_selected in line or topic_selected[1:] in line:
+				significative_tweets_counter +=1
+			total_tweets += 1
+		f.close()
+		if total_tweets > 0:
+			Sint = (significative_tweets_counter/total_tweets)
+		else:
+			Sint = 0.0
+		fout = open(pathToUserParameters+"interest/"+user, "w")
+		fout.write(str(Sint))
+		fout.close()
+def compute_and_store_recall(topic_selected, pathToFollowerList, pathToUserTweets, pathToUserParameters, unique_users_returned, api):
 	for username in unique_users_returned:
 		print username
 		username_followers_list = []
@@ -206,7 +227,7 @@ def compute_and_store_recall_and_interest(topic_selected, pathToFollowerList, pa
 		fp3 = open(pathToUserTweets+username, "r")
 		for line in fp3.readlines():
 			user_tweets_counter += 1 
-			if topic_selected in line:
+			if topic_selected in line or topic_selected[1:] in line:
 				significative_tweets_counter +=1
 				informations = []
 				informations = line.split("\t")
@@ -231,7 +252,4 @@ def compute_and_store_recall_and_interest(topic_selected, pathToFollowerList, pa
 		fp4 = open(pathToUserParameters+"recall/"+username+"_Srec.txt", "w");
 		fp4.write(str(recallScore).encode("utf-8"))
 		fp4.close()
-		fp5 = open(pathToUserParameters+"interest/"+username+"_Sint.txt", "w");
-		fp5.write(str(interest_in_that_topic).encode("utf-8"))
-		fp5.close()
-	print "[7] filtered by topic tweets printed and recall score calculated" 
+	print "[7] filtered by topic tweets printed and recall score calculated"   
