@@ -1,6 +1,6 @@
 # This Python file uses the following encoding: utf-8
 #!/usr/bin/
-
+from micro_influencer_utilities import *
 import tweepy
 import os
 import time
@@ -25,6 +25,8 @@ pathToDataFolder = "./../../Data"
 pathToSchwartzCentroids = "../../Schwartz_10"
 gloveWordVecFile = "../../../GloVe-1.2/glove.6B.300d.txt"
 
+topic_selected = topic_selection()
+pathToDataFolder = pathToDataFolder +"/"+topic_selected
 #-------------------------------------------------#
 #--Creating schwartz folder path if not existing--#
 #-------------------------------------------------#
@@ -79,14 +81,9 @@ for humanValue in schwartzBasicHumanValues:
 print "Centroids computed!"
 
 unique_users_returned = []
-fmil = open("./../../Data/00_potential_micro_influencers_users/potential_mi.txt", "r") # file micro influencer list
-for line in fmil.readlines():
-	line = line.rstrip('\n')
-	unique_users_returned.append(line)
-fmil.close()
+pathToUserList = "./../../Data"+"/"+topic_selected+"/00_potential_micro_influencers_users/user_list.csv"
+unique_users_returned = retrieve_user_list(pathToUserList)
 print "User list retrieved"
-
-
 
 
 stop = set(stopwords.words('english'))
@@ -142,40 +139,20 @@ for user in unique_users_returned:
 			now_centroid = cumulative_vectors[category]/total_words[category]
 			dist = distance.euclidean(now_centroid, schwartzCentroids[pos])
 			if dist != 0:
-				fuss.write(category + " " +str(now_centroid) + " " + str(total_words[category]) + " " + str(dist) + " " + str(total_words[category]*(1/dist)) +"\n")  #300d vector centroid of all tweet for that category, number of words, distance, score=n*1/dist
+				#fuss.write(category + " " +str(now_centroid) + " " + str(total_words[category]) + " " + str(dist) + " " + str(total_words[category]*(1/dist)) +"\n")  
+				fuss.write(category)
+				for element in now_centroid:
+					fuss.write(","+str(element))
+				fuss.write(","+str(total_words[category])+ "," + str(dist) + "," + str(total_words[category]*(1/dist)) +"\n")
+				#300d vector centroid of all tweet for that category, number of words, distance, score=n*1/dist
 			else:
-				fuss.write(category + " " +str(now_centroid) + " " + str(total_words[category]) + " " + str(dist) + " " + "max_value")
+				#fuss.write(category + " " +str(now_centroid) + " " + str(total_words[category]) + " " + str(dist) + " " + "max_value")
+				fuss.write(category)
+				for element in now_centroid:
+					fuss.write(","+str(element))
+				fuss.write("," + str(total_words[category]) + "," + str(dist) + "," + "max_value\n")
 		else:
-			fuss.write(category + "  no words in this category \n")
+			fuss.write(category + ", no words in this category\n")
 	fuss.close()
 
-	# for line in ftun.readlines():
-	# 	line = line.rstrip("\n")
-	# 	words = []
-	# 	words = line.split(" ")
-	# 	for word in words:
-	# 		if word.startswith('@') or word.isdigit() or ("http" in word) :
-	# 			continue
-
-#print schwartzCentroids["universalism"]
-
 print "process ended successfully"
-
-
-# def vec(w):
-#   return words.loc[w].as_matrix()
-
-
-# f = open(gloveWordVecFile,'r')
-# words = pd.read_csv(f, sep=" ", index_col=0, header=None, quoting=csv.QUOTE_NONE)
-# print vec("authority")
-
-# hh = numpy.asarray([82.5, 168.5])
-# aa = numpy.asarray([2.5, 8.5])
-
-# cc = hh - aa
-# ff = cc * 2
-# ss = cc / cc.size
-# print cc
-# print ff
-# print ss
