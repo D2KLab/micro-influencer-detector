@@ -19,11 +19,8 @@ import string
 from scipy.spatial import distance
 
 
-# pathToTwitterAuthData = "./../../twitterAccess.txt"
-pathToDataFolder = "./../../Data"
-# pathToDevKeyAndSecret = "../../access.txt"
-pathToSchwartzCentroids = "../../Schwartz_10"
-gloveWordVecFile = "../../../GloVe-1.2/glove.6B.300d.txt"
+pathToDataFolder = "Data"
+gloveWordVecFile = "GloVe/glove.6B.300d.txt" #download at http://nlp.stanford.edu/data/glove.6B.zip
 
 topic_selected = topic_selection()
 pathToDataFolder = pathToDataFolder +"/"+topic_selected
@@ -59,9 +56,7 @@ def loadGloveModel(gloveFile):     ##this model works and doesn't kill my cpu
         model[word] = embedding
     print "Done.",len(model)," words loaded!"
     return model
-
 localModel = loadGloveModel(gloveWordVecFile)
-#schwartzNCentroidFile = Path(pathToSchwartzCentroids+"/"+"schwartzCentroids.txt") #here we find key and secret of the user using the app on Twitter
 
 pos = 0
 schwartzCentroids = {}
@@ -75,13 +70,11 @@ for humanValue in schwartzBasicHumanValues:
 		schwartzNCentroid = schwartzNCentroid + np.asarray(localModel[representativeWord])
 		count_elements +=1
 	schwartzCentroids[schwartzNames[pos]] = schwartzNCentroid/count_elements
-	#f.write((schwartzNames[pos] + " " + str(schwartzNCentroid/count_elements) +"\n").encode("utf-8"))
 	pos +=1
-#f.close()
 print "Centroids computed!"
 
 unique_users_returned = []
-pathToUserList = "./../../Data"+"/"+topic_selected+"/00_potential_micro_influencers_users/user_list.csv"
+pathToUserList = "Data"+"/"+topic_selected+"/00_potential_micro_influencers_users/user_list.csv"
 unique_users_returned = retrieve_user_list(pathToUserList)
 print "User list retrieved"
 
@@ -98,8 +91,6 @@ def clean(doc):
 NON_BMP_RE = re.compile(u"[^\U00000000-\U0000d7ff\U0000e000-\U0000ffff]", flags=re.UNICODE)
 
 for user in unique_users_returned:
-	#user = "2_off_the_grid"
-	#total_words = {"selfdirection" : 0, "stimulation":0, "hedonism":0, "achievement":0, "power":0, "security":0, "conformity":0, "tradition":0, "benevolence":0, "universalism":0}
 	total_words = {}
 	cumulative_vectors ={}
 	for category in schwartzNames:

@@ -81,6 +81,12 @@ def create_all_necessary_folders(pathToDataFolder, topic_selected):
 		   os.makedirs(pathToDataFolder+"/03_users_parameters/embeddness")
 	if not os.path.exists(pathToDataFolder+"/03_users_parameters/interest"):  
 		   os.makedirs(pathToDataFolder+"/03_users_parameters/interest")
+	if not os.path.exists(pathToDataFolder+"/03_users_parameters/big5"):  
+		   os.makedirs(pathToDataFolder+"/03_users_parameters/big5")
+	if not os.path.exists("dataset"):  
+		   os.makedirs("dataset")
+	if not os.path.exists("Glove"):  
+		   os.makedirs("Glove")
 	print "[1] all folders created or checked" 
 	return pathToDataFolder 
 def topic_selection():

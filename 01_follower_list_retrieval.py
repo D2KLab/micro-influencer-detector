@@ -11,9 +11,9 @@ from datetime import datetime
 import json
 import re
 
-pathToTwitterAuthData = "./../../twitterAccess.txt"
-pathToDataFolder = "./../../Data"
-pathToDevKeyAndSecret = "../../access.txt"
+pathToTwitterAuthData = "twitterAccess.txt"
+pathToDataFolder = "Data"
+pathToDevKeyAndSecret = "access.txt"
 potentialMiPath = "/00_potential_micro_influencers_users/"
 followersPath = "/01_followers_list/"
 
@@ -22,6 +22,4 @@ topic_selected = topic_selection()
 pathToTopic = pathToDataFolder+"/"+topic_selected
 pathToUserCsv = pathToTopic + potentialMiPath + "user_list.csv"
 unique_users_returned = retrieve_user_list(pathToUserCsv) 
-#print unique_users_returned
-#print str(len(unique_users_returned))
 retrieve_and_store_followers_csv(pathToTopic + followersPath, unique_users_returned, api)

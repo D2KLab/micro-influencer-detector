@@ -11,15 +11,11 @@ from datetime import datetime
 import json
 import re
 
-#pathToTwitterAuthData = "./../../twitterAccess.txt"
-pathToDataFolder = "./../../Data"
-#pathToDevKeyAndSecret = "../../access.txt"
+pathToDataFolder = "Data"
 potentialMiPath = "/00_potential_micro_influencers_users/"
 followersPath = "/01_followers_list/"
-#tweetsPath = "/02_users_tweets/"
 parametersPath = "/03_users_parameters/"
 
-#api = authentication(pathToDevKeyAndSecret, pathToTwitterAuthData)
 topic_selected = topic_selection()
 pathToTopic = pathToDataFolder+"/"+topic_selected
 pathToUserCsv = pathToTopic + potentialMiPath + "user_list.csv"

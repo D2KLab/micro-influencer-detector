@@ -11,9 +11,9 @@ from datetime import datetime
 import json
 import re
 
-pathToTwitterAuthData = "./../../twitterAccess.txt"
-pathToDataFolder = "./../../Data"
-pathToDevKeyAndSecret = "../../access.txt"
+pathToTwitterAuthData = "twitterAccess.txt"
+pathToDataFolder = "Data"
+pathToDevKeyAndSecret = "access.txt"
 potentialMiPath = "/00_potential_micro_influencers_users/"
 followersPath = "/01_followers_list/"
 tweetsPath = "/02_users_tweets/"
