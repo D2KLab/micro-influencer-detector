@@ -83,10 +83,14 @@ def create_all_necessary_folders(pathToDataFolder, topic_selected):
 		   os.makedirs(pathToDataFolder+"/03_users_parameters/interest")
 	if not os.path.exists(pathToDataFolder+"/03_users_parameters/big5"):  
 		   os.makedirs(pathToDataFolder+"/03_users_parameters/big5")
+	if not os.path.exists(pathToDataFolder+"/03_users_parameters/y"):  
+		   os.makedirs(pathToDataFolder+"/03_users_parameters/y")
+	if not os.path.exists(pathToDataFolder+"/03_users_parameters/table"):  
+		   os.makedirs(pathToDataFolder+"/03_users_parameters/table")
 	if not os.path.exists("dataset"):  
 		   os.makedirs("dataset")
-	if not os.path.exists("Glove"):  
-		   os.makedirs("Glove")
+	if not os.path.exists("GloVe"):  
+		   os.makedirs("GloVe")
 	print "[1] all folders created or checked" 
 	return pathToDataFolder 
 def topic_selection():
@@ -197,7 +201,7 @@ def compute_and_store_embeddeness(pathToFollowerList, pathToUserParameters, uniq
 		else:
 			embeddnessScore = 0.0
 		#fp4 = open(pathToDataFolder+"/03_users_parameters/embeddness"+"/"+user+"_embeddnessScore.txt", "w");
-		fp4 = open(pathToUserParameters+"embeddness/"+user+"_Semb.txt", "w")
+		fp4 = open(pathToUserParameters+"embeddness/"+user, "w")
 		fp4.write(str(embeddnessScore).encode("utf-8"))
 		fp4.close()
 	print "[6] embeddness score computed and stored" 
@@ -255,7 +259,7 @@ def compute_and_store_recall(topic_selected, pathToFollowerList, pathToUserTweet
 			interest_in_that_topic = significative_tweets_counter/user_tweets_counter
 		else:
 			interest_in_that_topic = 0.0
-		fp4 = open(pathToUserParameters+"recall/"+username+"_Srec.txt", "w");
+		fp4 = open(pathToUserParameters+"recall/"+username, "w");
 		fp4.write(str(recallScore).encode("utf-8"))
 		fp4.close()
 	print "[7] filtered by topic tweets printed and recall score calculated"   
