@@ -19,7 +19,12 @@ followersPath = "/01_followers_list/"
 tweetsPath = "/02_users_tweets/"
 
 api = authentication(pathToDevKeyAndSecret, pathToTwitterAuthData)
-topic_selected = topic_selection()
+if len(sys.argv)== 2:
+	topic_selected = sys.argv[1]
+	if not topic_selected.startswith('#'):
+		topic_selected = "#"+topic_selected
+else:
+	topic_selected = topic_selection()
 pathToTopic = pathToDataFolder+"/"+topic_selected
 pathToUserCsv = pathToTopic + potentialMiPath + "user_list.csv"
 unique_users_returned = retrieve_user_list(pathToUserCsv)

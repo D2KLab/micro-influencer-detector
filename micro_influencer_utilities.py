@@ -103,7 +103,7 @@ def user_list_from_topic_selected(topic_selected, api):
 	users_returned = []
 	print("Looking for users with at least 1k and at most 20k followers,")
 	print("having recently spoke about topic selected", topic_selected)
-	for tweet in tweepy.Cursor(api.search,q=topic_selected, count = 100, lang = "en").items(1000): #now 1000, we'll exec on more topics			
+	for tweet in limit_handled(tweepy.Cursor(api.search,q=topic_selected, count = 100, lang = "en").items(1000)): #now 1000, we'll exec on more topics			
 		if (tweet.user.followers_count>1000 and tweet.user.followers_count<20000):
 			#print (tweet.user.screen_name)
 			if tweet.user.friends_count < tweet.user.followers_count:

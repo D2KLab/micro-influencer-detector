@@ -13,11 +13,17 @@ import re
 
 pathToTwitterAuthData = "twitterAccess.txt"
 pathToDataFolder = "Data"
-pathToDevKeyAndSecret = "access.txt"
+pathToDevKeyAndSecret = "consumer_api_keys.txt"
 potentialMiPath = "/00_potential_micro_influencers_users/"
 
 api = authentication(pathToDevKeyAndSecret, pathToTwitterAuthData)
-topic_selected = topic_selection()
+
+if len(sys.argv)== 2:
+	topic_selected = sys.argv[1]
+	if not topic_selected.startswith('#'):
+		topic_selected = "#"+topic_selected
+else:
+	topic_selected = topic_selection()
 pathToTopic = create_all_necessary_folders(pathToDataFolder, topic_selected)
 unique_users_retrieved = user_list_from_topic_selected(topic_selected, api)
 print "We have found " + str(len(unique_users_retrieved))
