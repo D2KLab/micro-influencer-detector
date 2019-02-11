@@ -12,14 +12,12 @@ from sklearn.model_selection import cross_val_score, cross_val_predict
 from sklearn import metrics
 from sklearn import svm
 
-
 #Reading the data set
-
 pathToDataFolder = "Data"
 parametersPath = "/03_users_parameters/"
 
 topic_selected = topic_selection()
-#topic_selected = "#offgrid"
+# topic_selected = "#offgrid"
 pathToTopic = pathToDataFolder+"/"+topic_selected
 pathToUserParameters = pathToTopic + parametersPath
 
@@ -41,7 +39,6 @@ f2.close()
 dataset = pandas.read_csv(pathToUserParameters+"/table/"+topic_selected[1:]+"2.csv")
 
 #Pre-processing data set to data frame by choosing features (X) and output (y)
-
 #print (dataset.head()) #debug 
 y = dataset.y #micro influencer yes = 1, no = 0
 X = dataset.drop(["user_screen_name", "Semb", "Srec", "Sint","y"],axis=1)# "num_of_words","distance", "y"], axis=1)
@@ -52,8 +49,10 @@ X = X.loc[:, ["big5_O", "big5_C", "big5_E", "big5_A", "big5_N","scoreselfdirecti
 # y = dataset.iloc[:, 3039] #old version
 #print (X.head()) #debug
 
-X = X.to_numpy()
-y = y.to_numpy()
+#X = X.to_numpy()
+X = X.as_matrix()
+#y = y.to_numpy()
+y = y.as_matrix()
 # array = dataset.to_numpy()  #old version
 # X = array[:, 1:3038] #old version
 # y = array[:, 3039] #old version
@@ -64,11 +63,11 @@ y = y.to_numpy()
 # This technique re-scales the data between a specified range(in this case, between 0–1), 
 # to ensure that certain features do not affect the final prediction more than the other features.
 
-
 # clf = svm.SVC(kernel='linear', C=1).fit(X_train, y_train) #i.e. example from documentation
 # clf.score(X_test, y_test) 
 scores = []
-rbf_svc = svm.SVC(kernel='rbf')
+
+rbf_svc = svm.SVC(kernel='rbf', gamma='scale')
 # documentation on the following function can be found at
 # https://scikit-learn.org/stable/modules/generated/sklearn.model_selection.KFold.html
 cv = KFold(n_splits=10, random_state=42, shuffle=False) 
@@ -77,7 +76,30 @@ for train_index, test_index in cv.split(X):
     # print("Test Index: ", test_index) #debug
     X_train, X_test, y_train, y_test = X[train_index], X[test_index], y[train_index], y[test_index]
     clf = rbf_svc.fit(X_train, y_train)
-    scores.append(clf.score(X_test, y_test))
+    scores.append(clf.score(X_test, y_test))  ##this is accuracy
+
+   
+
+my_scores = cross_val_score(clf, X, y, cv=10)  
+print("Accuracy: %0.2f (+/- %0.2f)" % (my_scores.mean(), my_scores.std() * 2)) 
+
+y_pred = rbf_svc.predict(X)
+y_true = y
+print("precision: ",metrics.precision_score(y_true, y_pred))
+print("recall: ",metrics.recall_score(y_true, y_pred))
+print("f1: ",metrics.f1_score(y_true, y_pred))
+
+
+#print("average_precision_score", cross_val_score(clf, X, y,cv=10, scoring='precision' ))
+#print("recall", cross_val_score(clf, X, y,  cv=10, scoring='recall'))
+#print("accuracy", cross_val_score(clf, X, y, scoring='accuracy', cv=10))
+#print("f1", cross_val_score(clf, X, y, scoring='f1', cv=10))
+
+#F1 = 2 * (precision * recall) / (precision + recall)
+
+
+# clf = svm.SVC(gamma='scale', random_state=0)
+# cross_val_score(clf, X, y, scoring='average_precision_score', cv=10)
 
 # We are using the RBF kernel of the SVM model, implemented using the sklearn library 
 # First, we indicate the number of folds we want our data set to be split into. 
@@ -94,5 +116,5 @@ for train_index, test_index in cv.split(X):
 # Each iteration of F-Fold CV provides an r2 score. We append each score to a list 
 # and get the mean value in order to determine the overall accuracy of the model.
 
-print("Score Cross: ", scores)
+#print("Score Cross aka accuracy: ", np.mean(scores))
 
