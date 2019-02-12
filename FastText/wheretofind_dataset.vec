@@ -1,0 +1,5 @@
+https://fasttext.cc/docs/en/english-vectors.html 
+wiki-news-300d-1M.vec.zip: 1 million word vectors trained on Wikipedia 2017,
+UMBC webbase corpus and statmt.org news dataset (16B tokens).
+
+Then change name into dataset.vec
