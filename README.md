@@ -8,6 +8,10 @@ Follow this logical sequence:
 03_compute_embeddedness.py 
 04_compute_recall.py 
 05_compute_interests.py 
-06_compute_engagement.py (not necessary at the moment)
-schwartz_csv.py
-big5_twitpersonality.py (till to upload)
+
+Before going on use Train_SVM_model.py in order to create SVM model to perform
+big5 evaluation on next step. This program is useful just the first time you'll run
+this process, if you need to perform analysis over other topic, you can skip this one,
+because you've already the models trained. 
+
+

@@ -14,6 +14,7 @@ potentialMiPath = "/00_potential_micro_influencers_users/"
 parametersPath = "/03_users_parameters/"
 
 topic_selected = topic_selection()
+# topic_selected = "#offgrid"
 pathToTopic = pathToDataFolder+"/"+topic_selected
 pathToUserCsv = pathToTopic + potentialMiPath + "user_list.csv"
 unique_users_returned = retrieve_user_list(pathToUserCsv)
@@ -23,6 +24,19 @@ fbig5 = open(pathToUserParameters+"/big5/big5.csv", "r")
 fout = open(pathToUserParameters+"table/"+topic_selected[1:]+".csv", "w")
 
 #table :username, Semb, Srec, Sint, Big5 *5 , (Schwartz*300 + n + dist + score) * 10 , y : total 3040 columns 
+
+fout.write("user_screen_name,Semb,Srec,Sint")
+for i in ["O", "C", "E", "A", "N"]:
+	fout.write(","+"big5_"+i)
+
+schwartzNames = ["selfdirection", "stimulation", "hedonism", "achievement", "power", "security", "conformity", "tradition", "benevolence", "universalism"]
+
+for i in schwartzNames:
+	for j in range(300):
+		fout.write(","+str(i)+"_"+str(j))
+	fout.write(",num_of_words"+str(i)+",distance"+str(i)+",score"+str(i))
+fout.write(",y\n")
+
 for user in unique_users_returned:
 	fout.write(str(user))
 	fin = open(pathToUserParameters+"embeddness/"+user, "r")
@@ -59,7 +73,7 @@ fout.close()
 fout = open(pathToUserParameters+"table/"+topic_selected[1:]+".csv", "r")
 line = fout.readline().split(",")
 fout.close()
-print "columns are: "+str(len(line))
-print "table created"
+print ("columns are: "+str(len(line)))
+print ("table created")
 
 

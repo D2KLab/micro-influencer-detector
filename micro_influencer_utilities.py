@@ -57,7 +57,7 @@ def authentication(pathToDevKeyAndSecret, pathToTwitterAuthData):
 
 	auth.set_access_token(access_token, access_token_secret)
 	api = tweepy.API(auth)#, wait_on_rate_limit=True, wait_on_rate_limit_notify=True)
-	print "[0] authentication completed with success"
+	print('[0] authentication completed with success')
 	return api
 def create_all_necessary_folders(pathToDataFolder, topic_selected):
 	#--Create the Data collection folder if not exists--#
@@ -91,10 +91,10 @@ def create_all_necessary_folders(pathToDataFolder, topic_selected):
 		   os.makedirs("dataset")
 	if not os.path.exists("GloVe"):  
 		   os.makedirs("GloVe")
-	print "[1] all folders created or checked" 
+	print ("[1] all folders created or checked") 
 	return pathToDataFolder 
 def topic_selection():
-	topic_selected = raw_input('What topic are you looking micro-influencers for?\n')
+	topic_selected = input('What topic are you looking micro-influencers for?\n')
 	if not topic_selected.startswith('#'):
 		topic_selected = "#"+topic_selected
 		#print topic_selected 
@@ -115,11 +115,11 @@ def store_user_list_csv(pathToStore, unique_users_returned):
 	fp1 = open(pathToStore, "w")
 	for mi_username in unique_users_returned:
 		if mi_username == unique_users_returned[-1]:
-			fp1.write(str(mi_username).encode("utf-8"))
+			fp1.write(str(mi_username))
 		else:
-			fp1.write((str(mi_username)+",").encode("utf-8"))
+			fp1.write(str(mi_username)+",")
 	fp1.close()
-	print "[2] List of potential micro influencers stored."
+	print ("[2] List of potential micro influencers stored.")
 def retrieve_user_list(pathToUserList):
 	unique_users_returned = []
 	f = open(pathToUserList, "r")
@@ -137,32 +137,32 @@ def retrieve_and_store_followers_csv(pathToFollowerList, unique_users_returned, 
 		count = 0
 		while True:
 			try:
-				print "retrieving followers of:  " + i 
+				print ("retrieving followers of:  " + i) 
 				fp2 = open(pathToFollowerList + i +".csv", "w")
 				for follower_id in limit_handled(tweepy.Cursor(api.followers_ids, screen_name=i).items()):
 					if count == 0:
-						fp2.write(str(follower_id).encode("utf-8"))
+						fp2.write(str(follower_id))
 						count +=1
 					else:
-						fp2.write((","+str(follower_id)).encode("utf-8"))
+						fp2.write(","+str(follower_id))
 						count +=1
 				fp2.close()
 				break #exiting infinite while loop
 			except tweepy.TweepError:
 				time.sleep(15)
-		print i + "'s followers stored. They are " + str(count)
-	print "[3] Storing users followers phase completed." 
+		print (i + "'s followers stored. They are " + str(count))
+	print ("[3] Storing users followers phase completed.") 
 def retrieve_and_store_tweet_tab_back(pathToUserTweets, unique_users_returned, api):
 	for username in unique_users_returned:
 		while True:
 			try:
 				#get tweets
-				print "Searching tweets of " + username
+				print ("Searching tweets of " + username)
 				#fp3 = open(pathToDataFolder+"/02_users_tweets"+"/"+username, "w")
 				fp3 = open(pathToUserTweets+username, "w")
 				for page in limit_handled(tweepy.Cursor(api.user_timeline, username, count=100, lang = "en").pages()):  #all tweets
 					for tweet in page:
-						fp3.write((str(tweet.id)+"\t").encode("utf-8"))
+						fp3.write(str(tweet.id)+"\t")
 						new_tweet = ""
 						tweet_cleaned = tweet.text.split("\n")
 						for sintagma in tweet_cleaned:
@@ -171,13 +171,13 @@ def retrieve_and_store_tweet_tab_back(pathToUserTweets, unique_users_returned, a
 						tweet_cleaned2 = new_tweet.split("\t")
 						for sintagma2 in tweet_cleaned2:
 							new_tweet2 = new_tweet2 + " " + sintagma2
-						fp3.write((new_tweet2 + "\n").encode("utf-8"))
+						fp3.write(new_tweet2 + "\n")
 						#at the end of the story we have  ---->  TweetId\tTweetText\n				
 				fp3.close()
 				break #exiting infinite while loop
 			except tweepy.TweepError as e:
 				print(e)
-	print "[4]tweets retrieved and stored" 
+	print ("[4]tweets retrieved and stored") 
 def compute_and_store_embeddeness(pathToFollowerList, pathToUserParameters, unique_users_returned):
 	compare_follows_dict = {}
 	for username in unique_users_returned:
@@ -186,7 +186,7 @@ def compute_and_store_embeddeness(pathToFollowerList, pathToUserParameters, uniq
 		username_followers_list = fp2.read().split(",")
 		fp2.close()
 		compare_follows_dict[username] = username_followers_list
-	print "[5] dictionary created"
+	print ("[5] dictionary created")
 
 	for user in compare_follows_dict:
 		embeddnessScore = 0.0
@@ -202,9 +202,9 @@ def compute_and_store_embeddeness(pathToFollowerList, pathToUserParameters, uniq
 			embeddnessScore = 0.0
 		#fp4 = open(pathToDataFolder+"/03_users_parameters/embeddness"+"/"+user+"_embeddnessScore.txt", "w");
 		fp4 = open(pathToUserParameters+"embeddness/"+user, "w")
-		fp4.write(str(embeddnessScore).encode("utf-8"))
+		fp4.write(str(embeddnessScore))
 		fp4.close()
-	print "[6] embeddness score computed and stored" 
+	print ("[6] embeddness score computed and stored") 
 def compute_and_store_interest(topic_selected, pathToUserTweets, pathToUserParameters, unique_users_returned):
 	for user in unique_users_returned:
 		#print topic_selected
@@ -226,7 +226,7 @@ def compute_and_store_interest(topic_selected, pathToUserTweets, pathToUserParam
 		fout.close()
 def compute_and_store_recall(topic_selected, pathToFollowerList, pathToUserTweets, pathToUserParameters, unique_users_returned, api):
 	for username in unique_users_returned:
-		print username
+		print (username)
 		username_followers_list = []
 		fp2 = open(pathToFollowerList+username+".csv", "r")
 		username_followers_list = fp2.read().split(",")
@@ -241,15 +241,20 @@ def compute_and_store_recall(topic_selected, pathToFollowerList, pathToUserTweet
 				significative_tweets_counter +=1
 				informations = []
 				informations = line.split("\t")
-				if informations[0].isdigit():			
+				while True:
 					try:
-						statuses = api.retweets(informations[0])
-						for status in statuses:
-							#print "status user id :" + str(status.user.id)
-							if str(status.user.id).rstrip("\n") in username_followers_list:
-								total_retweets_performed_by_followers +=1
-					except tweepy.RateLimitError:
-						time.sleep(15*60)
+						if informations[0].isdigit():			
+							try:
+								statuses = api.retweets(informations[0])
+								for status in statuses:
+									#print "status user id :" + str(status.user.id)
+									if str(status.user.id).rstrip("\n") in username_followers_list:
+										total_retweets_performed_by_followers +=1
+							except tweepy.RateLimitError:
+								time.sleep(15*60)
+						break
+					except:
+						print("Some error occurred, I'm trying again")
 		fp3.close()
 		if significative_tweets_counter > 0:
 			recallScore = (total_retweets_performed_by_followers/significative_tweets_counter)#/len(username_followers_list) rimosso per la non pagination quindi 100 retweet per tutti
@@ -260,6 +265,6 @@ def compute_and_store_recall(topic_selected, pathToFollowerList, pathToUserTweet
 		else:
 			interest_in_that_topic = 0.0
 		fp4 = open(pathToUserParameters+"recall/"+username, "w");
-		fp4.write(str(recallScore).encode("utf-8"))
+		fp4.write(str(recallScore))
 		fp4.close()
-	print "[7] filtered by topic tweets printed and recall score calculated"   
+	print ("[7] filtered by topic tweets printed and recall score calculated")   

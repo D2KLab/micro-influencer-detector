@@ -46,7 +46,7 @@ schwartzNames = ["selfdirection", "stimulation", "hedonism", "achievement", "pow
 
 
 def loadGloveModel(gloveFile):     ##this model works and doesn't kill my cpu
-    print "Loading Glove Model"
+    print ("Loading Glove Model")
     f = open(gloveFile,'r')
     model = {}
     for line in f:
@@ -54,7 +54,7 @@ def loadGloveModel(gloveFile):     ##this model works and doesn't kill my cpu
         word = splitLine[0]
         embedding = np.array([float(val) for val in splitLine[1:]])
         model[word] = embedding
-    print "Done.",len(model)," words loaded!"
+    print ("Done.",len(model)," words loaded!")
     return model
 localModel = loadGloveModel(gloveWordVecFile)
 
@@ -71,12 +71,12 @@ for humanValue in schwartzBasicHumanValues:
 		count_elements +=1
 	schwartzCentroids[schwartzNames[pos]] = schwartzNCentroid/count_elements
 	pos +=1
-print "Centroids computed!"
+print ("Centroids computed!")
 
 unique_users_returned = []
 pathToUserList = "Data"+"/"+topic_selected+"/00_potential_micro_influencers_users/user_list.csv"
 unique_users_returned = retrieve_user_list(pathToUserList)
-print "User list retrieved"
+print ("User list retrieved")
 
 
 stop = set(stopwords.words('english'))
@@ -97,10 +97,10 @@ for user in unique_users_returned:
 		total_words[category] = 0
 		cumulative_vectors[category] = np.asarray([0.0]*300)
 
-	print "Working on " + user
+	print ("Working on " + user)
 	fuss = open(pathToDataFolder+"/03_users_parameters/schwartz/"+user, "w")#file user schwartz scores
 	ftun = open(pathToDataFolder + "/" + "02_users_tweets/" + user, "r") #file tweets user name
-	doc = ftun.read().decode('utf-8') 
+	doc = ftun.read() 
 	doc_complete = doc.split('\n')
 	doc_cleaned = [clean(doc).split() for doc in doc_complete]
 
@@ -109,11 +109,11 @@ for user in unique_users_returned:
 		for word in line:
 			if word.startswith('@') or word.isdigit() or ("http" in word):
 		 		continue
-		 	else:
-		 		word = NON_BMP_RE.sub('', word)
-		 		if len(word)>0: 
+			else:
+				word = NON_BMP_RE.sub('', word)
+				if len(word)>0: 
 		 			#doc_further_cleaned.append(word)
-		 			if word in localModel: 
+					if word in localModel: 
 		 				min_distance = sys.float_info.max
 		 				which_schwartz = ""
 		 				for pos in schwartzNames: 
@@ -146,4 +146,4 @@ for user in unique_users_returned:
 			fuss.write(category + ", no words in this category\n")
 	fuss.close()
 
-print "process ended successfully"
+print ("process ended successfully")

@@ -82,12 +82,19 @@ for train_index, test_index in cv.split(X):
 
 my_scores = cross_val_score(clf, X, y, cv=10)  
 print("Accuracy: %0.2f (+/- %0.2f)" % (my_scores.mean(), my_scores.std() * 2)) 
-
 y_pred = rbf_svc.predict(X)
 y_true = y
 print("precision: ",metrics.precision_score(y_true, y_pred))
 print("recall: ",metrics.recall_score(y_true, y_pred))
 print("f1: ",metrics.f1_score(y_true, y_pred))
+#print("Score Cross aka accuracy: ", np.mean(scores))
+
+fout = open(pathToUserParameters+"cv_results.txt", "w")
+fout.write("Accuracy +-: " + str(my_scores.mean()) +" " + str(my_scores.std() * 2) + "\n")
+fout.write("precision: " + str(metrics.precision_score(y_true, y_pred)) +"\n")
+fout.write("recall: " + str(metrics.recall_score(y_true, y_pred)) +"\n")
+fout.write("f1: " + str(metrics.f1_score(y_true, y_pred)) +"\n")
+fout.close()
 
 
 #print("average_precision_score", cross_val_score(clf, X, y,cv=10, scoring='precision' ))
@@ -116,5 +123,5 @@ print("f1: ",metrics.f1_score(y_true, y_pred))
 # Each iteration of F-Fold CV provides an r2 score. We append each score to a list 
 # and get the mean value in order to determine the overall accuracy of the model.
 
-#print("Score Cross aka accuracy: ", np.mean(scores))
+
 

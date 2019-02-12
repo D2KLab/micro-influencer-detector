@@ -26,5 +26,5 @@ else:
 	topic_selected = topic_selection()
 pathToTopic = create_all_necessary_folders(pathToDataFolder, topic_selected)
 unique_users_retrieved = user_list_from_topic_selected(topic_selected, api)
-print "We have found " + str(len(unique_users_retrieved))
+print ("We have found " + str(len(unique_users_retrieved)))
 store_user_list_csv(pathToTopic + potentialMiPath + "user_list.csv", unique_users_retrieved)

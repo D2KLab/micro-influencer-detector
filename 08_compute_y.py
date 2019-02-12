@@ -60,4 +60,4 @@ for user in unique_users_returned:
 			fy.write("0")
 			fy.close()
 
-print "y computed"
+print ("y computed")
