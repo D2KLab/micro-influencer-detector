@@ -16,8 +16,12 @@ from sklearn import svm
 pathToDataFolder = "Data"
 parametersPath = "/03_users_parameters/"
 
-topic_selected = topic_selection()
-# topic_selected = "#offgrid"
+if len(sys.argv)== 2:
+	topic_selected = sys.argv[1]
+	if not topic_selected.startswith('#'):
+		topic_selected = "#"+topic_selected
+else:
+	topic_selected = topic_selection()
 pathToTopic = pathToDataFolder+"/"+topic_selected
 pathToUserParameters = pathToTopic + parametersPath
 

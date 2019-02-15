@@ -15,7 +15,12 @@ tweet_threshold = 3
 vectorizer = CountVectorizer(stop_words="english", analyzer="word")
 analyzer = vectorizer.build_analyzer()
 
-topic_selected = topic_selection()
+if len(sys.argv)== 2:
+    topic_selected = sys.argv[1]
+    if not topic_selected.startswith('#'):
+        topic_selected = "#"+topic_selected
+else:
+    topic_selected = topic_selection()
 pathToUserList = "./Data/"+topic_selected+"/00_potential_micro_influencers_users/user_list.csv"
 f = open(pathToUserList, "r")
 usernames = f.read().split(",")
@@ -25,8 +30,11 @@ wordDictionary = dsu.parseFastText(dataset_path)
 print("Data successfully loaded.")
 
 outfile = []
+user_progress = 0
 for username in usernames:
+    user_progress +=1
     print("\nUser:",username)
+    print("progress: " + str(user_progress) + "/" + str(len(usernames)))
     tweet_file_path = "Data/"+topic_selected+"/02_users_tweets/"+username
     if not os.path.isfile(tweet_file_path):
         print("Error. Cannot find tweets for username",username)

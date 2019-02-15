@@ -13,7 +13,12 @@ pathToDataFolder = "Data"
 potentialMiPath = "/00_potential_micro_influencers_users/"
 parametersPath = "/03_users_parameters/"
 
-topic_selected = topic_selection()
+if len(sys.argv)== 2:
+	topic_selected = sys.argv[1]
+	if not topic_selected.startswith('#'):
+		topic_selected = "#"+topic_selected
+else:
+	topic_selected = topic_selection()
 pathToTopic = pathToDataFolder+"/"+topic_selected
 pathToUserCsv = pathToTopic + potentialMiPath + "user_list.csv"
 unique_users_returned = retrieve_user_list(pathToUserCsv)

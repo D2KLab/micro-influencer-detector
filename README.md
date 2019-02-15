@@ -14,4 +14,8 @@ big5 evaluation on next step. This program is useful just the first time you'll 
 this process, if you need to perform analysis over other topic, you can skip this one,
 because you've already the models trained. 
 
-
+06_big5_csv.py
+07_scheartz_csv.py
+08_compute_y.py
+09_create_table.py
+10_ten_fold_cross_validation.py

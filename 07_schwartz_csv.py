@@ -22,7 +22,12 @@ from scipy.spatial import distance
 pathToDataFolder = "Data"
 gloveWordVecFile = "GloVe/glove.6B.300d.txt" #download at http://nlp.stanford.edu/data/glove.6B.zip
 
-topic_selected = topic_selection()
+if len(sys.argv)== 2:
+	topic_selected = sys.argv[1]
+	if not topic_selected.startswith('#'):
+		topic_selected = "#"+topic_selected
+else:
+	topic_selected = topic_selection()
 pathToDataFolder = pathToDataFolder +"/"+topic_selected
 #-------------------------------------------------#
 #--Creating schwartz folder path if not existing--#
@@ -89,8 +94,9 @@ def clean(doc):
     return normalized
 
 NON_BMP_RE = re.compile(u"[^\U00000000-\U0000d7ff\U0000e000-\U0000ffff]", flags=re.UNICODE)
-
+user_progress = 0
 for user in unique_users_returned:
+	user_progress +=1
 	total_words = {}
 	cumulative_vectors ={}
 	for category in schwartzNames:
@@ -98,6 +104,7 @@ for user in unique_users_returned:
 		cumulative_vectors[category] = np.asarray([0.0]*300)
 
 	print ("Working on " + user)
+	print("progress: " + str(user_progress) + "/" + str(len(unique_users_returned)))
 	fuss = open(pathToDataFolder+"/03_users_parameters/schwartz/"+user, "w")#file user schwartz scores
 	ftun = open(pathToDataFolder + "/" + "02_users_tweets/" + user, "r") #file tweets user name
 	doc = ftun.read() 

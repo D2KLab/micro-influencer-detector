@@ -133,11 +133,14 @@ def limit_handled(cursor):
 		except tweepy.RateLimitError:
 			time.sleep(15*60) 
 def retrieve_and_store_followers_csv(pathToFollowerList, unique_users_returned, api):
+	user_progress = 0
 	for i in unique_users_returned:
 		count = 0
+		user_progress +=1
 		while True:
 			try:
-				print ("retrieving followers of:  " + i) 
+				print ("retrieving followers of:  " + i) 				
+				print("progress: " + str(user_progress) + "/" + str(len(unique_users_returned)))
 				fp2 = open(pathToFollowerList + i +".csv", "w")
 				for follower_id in limit_handled(tweepy.Cursor(api.followers_ids, screen_name=i).items()):
 					if count == 0:
@@ -153,11 +156,14 @@ def retrieve_and_store_followers_csv(pathToFollowerList, unique_users_returned, 
 		print (i + "'s followers stored. They are " + str(count))
 	print ("[3] Storing users followers phase completed.") 
 def retrieve_and_store_tweet_tab_back(pathToUserTweets, unique_users_returned, api):
+	user_progress = 0
 	for username in unique_users_returned:
+		user_progress +=1
 		while True:
 			try:
 				#get tweets
 				print ("Searching tweets of " + username)
+				print("progress: " + str(user_progress) + "/" + str(len(unique_users_returned)))
 				#fp3 = open(pathToDataFolder+"/02_users_tweets"+"/"+username, "w")
 				fp3 = open(pathToUserTweets+username, "w")
 				for page in limit_handled(tweepy.Cursor(api.user_timeline, username, count=100, lang = "en").pages()):  #all tweets
@@ -225,8 +231,11 @@ def compute_and_store_interest(topic_selected, pathToUserTweets, pathToUserParam
 		fout.write(str(Sint))
 		fout.close()
 def compute_and_store_recall(topic_selected, pathToFollowerList, pathToUserTweets, pathToUserParameters, unique_users_returned, api):
+	user_progress = 0
 	for username in unique_users_returned:
+		user_progress += 1
 		print (username)
+		print("progress: " + str(user_progress) + "/" + str(len(unique_users_returned)))
 		username_followers_list = []
 		fp2 = open(pathToFollowerList+username+".csv", "r")
 		username_followers_list = fp2.read().split(",")
