@@ -2,7 +2,7 @@
 #!/usr/bin/
 
 
-import pandas
+import pandas as pd
 from sklearn.model_selection import KFold
 from sklearn.preprocessing import MinMaxScaler
 from sklearn.svm import SVR
@@ -11,6 +11,9 @@ from micro_influencer_utilities import *
 from sklearn.model_selection import cross_val_score, cross_val_predict
 from sklearn import metrics
 from sklearn import svm
+from sklearn.model_selection import cross_validate
+from sklearn.model_selection import cross_val_score
+from sklearn.metrics import classification_report
 
 #Reading the data set
 pathToDataFolder = "Data"
@@ -40,7 +43,7 @@ f.close()
 f2.close()
 
 #read csv from the filtered and clean csv(just created), not the old one (dirt one)
-dataset = pandas.read_csv(pathToUserParameters+"/table/"+topic_selected[1:]+"2.csv")
+dataset = pd.read_csv(pathToUserParameters+"/table/"+topic_selected[1:]+"2.csv")
 
 #Pre-processing data set to data frame by choosing features (X) and output (y)
 #print (dataset.head()) #debug 
@@ -69,9 +72,17 @@ y = y.as_matrix()
 
 # clf = svm.SVC(kernel='linear', C=1).fit(X_train, y_train) #i.e. example from documentation
 # clf.score(X_test, y_test) 
-scores = []
+accuracy = []    
+precision_micro = []
+recall_micro = []
+f1_micro = []
 
-rbf_svc = svm.SVC(kernel='rbf', gamma='scale')
+# rbf_svc = svm.SVC(kernel='rbf', gamma='scale')
+# rbf_svc = svm.SVC(kernel='linear', C=1, gamma=1)
+# rbf_svc = svm.SVC(kernel='linear', C=1, gamma=100)
+# rbf_svc = svm.SVC(kernel='rbf', C=1, gamma=100)
+# rbf_svc = svm.SVC(kernel='rbf', C=100, gamma=100)
+rbf_svc = svm.SVC(kernel='rbf', C=1000, gamma=1000)
 # documentation on the following function can be found at
 # https://scikit-learn.org/stable/modules/generated/sklearn.model_selection.KFold.html
 cv = KFold(n_splits=10, random_state=42, shuffle=False) 
@@ -80,25 +91,44 @@ for train_index, test_index in cv.split(X):
     # print("Test Index: ", test_index) #debug
     X_train, X_test, y_train, y_test = X[train_index], X[test_index], y[train_index], y[test_index]
     clf = rbf_svc.fit(X_train, y_train)
-    scores.append(clf.score(X_test, y_test))  ##this is accuracy
+    accuracy.append(clf.score(X_test, y_test))  ##this is accuracy
+#     y_pred = clf.predict(X_test)
+#     precision_micro.append(metrics.precision_score(y_test, y_pred, average='micro'))
+#     recall_micro.append(metrics.recall_score(y_test, y_pred, average='micro'))
+#     f1_micro.append(metrics.f1_score(y_test, y_pred, average='micro'))
 
-   
+
+# print ("Scoring system:")
+# print("f1_micro array", f1_micro)
+# print("Mean Accuracy: ", np.mean(accuracy))
+# print("Mean precision_micro score:", np.mean(precision_micro))
+# print("Mean recall_micro score:", np.mean(recall_micro))
+# print("Mean f1_micro score:", np.mean(f1_micro))
+
+print("Scoring system")  
 
 my_scores = cross_val_score(clf, X, y, cv=10)  
 print("Accuracy: %0.2f (+/- %0.2f)" % (my_scores.mean(), my_scores.std() * 2)) 
-y_pred = rbf_svc.predict(X)
+y_pred = clf.predict(X)
 y_true = y
-print("precision: ",metrics.precision_score(y_true, y_pred))
-print("recall: ",metrics.recall_score(y_true, y_pred))
-print("f1: ",metrics.f1_score(y_true, y_pred))
+print("precision: ",metrics.precision_score(y_true, y_pred, average='micro'))
+print("recall: ",metrics.recall_score(y_true, y_pred, average='micro'))
+print("f1: ",metrics.f1_score(y_true, y_pred, average='micro'))
 #print("Score Cross aka accuracy: ", np.mean(scores))
 
 fout = open(pathToUserParameters+"cv_results.txt", "w")
 fout.write("Accuracy +-: " + str(my_scores.mean()) +" " + str(my_scores.std() * 2) + "\n")
-fout.write("precision: " + str(metrics.precision_score(y_true, y_pred)) +"\n")
-fout.write("recall: " + str(metrics.recall_score(y_true, y_pred)) +"\n")
-fout.write("f1: " + str(metrics.f1_score(y_true, y_pred)) +"\n")
+fout.write("precision: " + str(metrics.precision_score(y_true, y_pred, average='micro')) +"\n")
+fout.write("recall: " + str(metrics.recall_score(y_true, y_pred, average='micro')) +"\n")
+fout.write("f1: " + str(metrics.f1_score(y_true, y_pred, average='micro')) +"\n")
 fout.close()
+
+
+print("Classification report: ")
+# y_true = y
+# y_pred = clf.predict(X)
+target_names = ['not_micro_influencer', 'micro_influencer']
+print(classification_report(y_true, y_pred, target_names=target_names))
 
 
 #print("average_precision_score", cross_val_score(clf, X, y,cv=10, scoring='precision' ))

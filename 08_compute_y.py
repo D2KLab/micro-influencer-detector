@@ -43,6 +43,7 @@ for user in unique_users_returned:
 avg_score_recall = avg_score_recall/total_user
 avg_score_interest = avg_score_interest/total_user
 
+total_influencers = 0
 for user in unique_users_returned:
 	fy = open(pathToUserParameters+"y/"+user, "w")
 	fe = open(pathToUserParameters+"embeddness/"+user, "r")
@@ -60,9 +61,11 @@ for user in unique_users_returned:
 		fi.close()
 		if ((recall > avg_score_recall) and (interest > avg_score_interest)):
 			fy.write("1")
+			total_influencers+=1
 			fy.close()
 		else:
 			fy.write("0")
 			fy.close()
 
-print ("y computed")
+print ("y computed, there are: " + str(total_influencers) + "/"+ str(len(unique_users_returned))+" micro-influencers")
+print("for the topic: " +topic_selected)

@@ -277,3 +277,41 @@ def compute_and_store_recall(topic_selected, pathToFollowerList, pathToUserTweet
 		fp4.write(str(recallScore))
 		fp4.close()
 	print ("[7] filtered by topic tweets printed and recall score calculated")   
+
+def compute_and_store_engagement(topic_selected, pathToUserTweets, pathToUserParameters, unique_users_returned, api):
+	user_progress = 0
+	for user in unique_users_returned:
+		tweet_skipped = 0
+		user_progress += 1
+		print (user)
+		print("progress: " + str(user_progress) + "/" + str(len(unique_users_returned)))
+		fin = open(pathToUserTweets+user, "r")
+		total_sum = 0.0
+		total_tweets = 0.0
+		followers_count = api.get_user(user).followers_count
+		for line in fin.readlines():
+			elements = line.split("\t") #tweet_id \t tweet_text
+			try:
+				tweet = api.get_status(elements[0])
+				sum_retweet_like = tweet.retweet_count + tweet.favorite_count
+				total_sum += sum_retweet_like
+				total_tweets += 1
+			except tweepy.RateLimitError:
+				print("Rate limit, i'm sleeping")
+				time.sleep(15*60)
+			except:				
+				tweet_skipped +=1
+				print("Tweepy error, tweet skipped over " + str(total_tweets), tweet_skipped)
+				continue
+		Score_engagement = (total_sum/followers_count)/total_tweets
+		fin.close()
+
+		if not os.path.exists(pathToUserParameters+"/engagement/"):  
+		   os.makedirs(pathToUserParameters+"/engagement/")
+
+		fout = open(pathToUserParameters+"/engagement/"+user,"w")
+		fout.write(str(Score_engagement))
+		fout.close()
+
+		
+
