@@ -66,7 +66,7 @@ for user in unique_users_returned:
 		for element in elements[1:]:
 			fout.write(","+str(element))
 	fin.close()
-	fin = open(pathToUserParameters+"y/"+user, "r")
+	fin = open(pathToUserParameters+"y2/"+user, "r") #--------change here if you want 1 or 2
 	y = int(fin.read())
 	fin.close()
 	fout.write(","+str(y))

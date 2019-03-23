@@ -11,7 +11,7 @@ from datetime import datetime
 import json
 import re
 
-pathToDataFolder = "Data2"
+pathToDataFolder = "Data"
 potentialMiPath = "/00_potential_micro_influencers_users/"
 followersPath = "/01_followers_list/"
 tweetsPath = "/02_users_tweets/"

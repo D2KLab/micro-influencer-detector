@@ -246,7 +246,7 @@ def compute_and_store_recall(topic_selected, pathToFollowerList, pathToUserTweet
 		fp3 = open(pathToUserTweets+username, "r")
 		for line in fp3.readlines():
 			user_tweets_counter += 1 
-			if topic_selected in line or topic_selected[1:] in line:
+			if topic_selected in line: #or topic_selected[1:] in line:
 				significative_tweets_counter +=1
 				informations = []
 				informations = line.split("\t")

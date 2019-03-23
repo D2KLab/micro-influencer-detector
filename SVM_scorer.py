@@ -69,15 +69,15 @@ ymat = y
 
 X = np.array(X)
 y = np.array(y)
-# print("y: ", y)
+print("y: ", y)
 
 scaler = MinMaxScaler(feature_range=(0, 1)) #old version
 X = scaler.fit_transform(X) #old version
 
 Xmat =scaler.fit_transform(Xmat)
 # kfold = model_selection.KFold(n_splits=10, random_state=42)
-skf = StratifiedKFold(n_splits=10)
-rbf_svc = svm.SVC(kernel='rbf', gamma='scale', class_weight={1:10}) #dai peso 10 alla classe 1
+skf = StratifiedKFold(n_splits=5)
+rbf_svc = svm.SVC(kernel='rbf', gamma='scale', class_weight={1:5})#dai peso 10 alla classe 1
 # print("cross_val_rec_micro", cross_val_score(rbf_svc, X, y, scoring='recall_micro', cv=10))
 # print("cross_val_rec_macro", cross_val_score(rbf_svc, X, y, scoring='f1_micro', cv=10))
 
@@ -118,8 +118,8 @@ for train_index, test_index in skf.split(X, y):
 	# print("recall", recall_score(y_test, y_pred, labels=None, pos_label=1, average='binary'))
 	precision.append(precision_score(y_test, y_pred, labels=None, pos_label=1, average='binary'))
 	# print("precision", precision_score(y_test, y_pred, labels=None, pos_label=1, average='binary'))
-	# print("y_test",y_test)
-	# print("y_pred", y_pred)
+	print("y_test",y_test)
+	print("y_pred", y_pred)
 
 print("mean accuracy: ",np.mean(accuracy))
 print("mean recall: ", np.mean(recall))
@@ -165,7 +165,14 @@ def plot_confusion_matrix(cm, classes, normalize=False, title='Confusion matrix'
     plt.ylabel('True label')
     plt.xlabel('Predicted label')
 
-# cnf_matrix_tra = confusion_matrix(y_true, y_pred)
+
+y_pred = rbf_svc.fit(X, y).predict(X)
+tn, fp, fn, tp = confusion_matrix(y, y_pred).ravel();
+print("tn:", tn)
+print("fp:", fp)
+print("fn:", fn)
+print("tp:", tp)
+# cnf_matrix_tra = confusion_matrix(y, y_pred)
 # class_names = [0,1]
 # plt.figure()
 # plot_confusion_matrix(cnf_matrix_tra , classes=class_names, title='Confusion matrix')
